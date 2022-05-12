@@ -1,5 +1,3 @@
-let baseUrl = ""
+export let baseUrl = "https://prabjot09.github.io/restaurant-reservation-app/"
 
-window.addEventListener('load', (event: Event) => {
-
-})
+window.location.href = baseUrl + "restaurant-reservations/";
