@@ -1,0 +1,57 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.table-card {
+  transition: transform .1s;
+  cursor: pointer;
+}
+
+.table-card:hover {
+  transform: scale(1.05);
+}
+
+.tableUnselected {
+  background-color: #ddd;
+
+}
+
+.tableSelected {
+  background-color: rgb(188, 208, 255);
+}
+
+.tableLabels {
+  font-size: 75%;
+}
+
+.staff_view_container {
+  height: 200px;
+  margin-bottom: 25px;
+}
+
+.staff_view_opt {
+  width: 45%;
+  height: 95%;
+  background-color: #3194ff;
+  border-radius: 5%;
+}
+
+@media (max-width: 575px) {
+  #opt-container {
+    height: 100px;
+  }
+}
+
+.upcoming_reservations {
+  height: 85px;
+}
