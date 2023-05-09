@@ -80,7 +80,8 @@ export const StaffOverview: React.FC<Props> = ( { restaurantName } ) => {
                     <div className="d-flex align-items-center justify-content-around staff_view_container"
                         id="opt-container">
                         <Link 
-                            to="/staff/table_view" 
+                            to="/staff/tables" 
+                            state={{ restaurantName: restaurantName }}
                             className="d-flex align-items-center justify-content-around staff_view_opt btn btn-primary"
                         >
                             <div>
@@ -89,7 +90,8 @@ export const StaffOverview: React.FC<Props> = ( { restaurantName } ) => {
                             </div>
                         </Link>
                         <Link 
-                            to="/staff/table_view" 
+                            to="/staff/reservations" 
+                            state={{ restaurantName: restaurantName }}
                             className="d-flex align-items-center justify-content-around staff_view_opt btn btn-primary"
                         >
                             <div style={{ textDecoration: "none" }}>

@@ -2,6 +2,8 @@ import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { StaffLogin } from "./StaffLogin";
 import { StaffOverview } from "./StaffOverview";
+import TableLayout from "./TableLayout";
+import TimeLayout from "./TimeLayout";
 
 interface Props {
     isStaff: boolean;
@@ -11,7 +13,8 @@ interface Props {
 export const StaffBase: React.FC<Props> = ( { isStaff, setIsStaff } ) => {
 
     const location = useLocation();
-    const { restaurantName } = (location.state as { restaurantName: string});
+    console.log(location.state);
+    const { restaurantName } = (location.state as { restaurantName: string });
 
     return (
         <div>
@@ -23,7 +26,11 @@ export const StaffBase: React.FC<Props> = ( { isStaff, setIsStaff } ) => {
                     { !isStaff ? (
                         <Route index element={<StaffLogin setIsStaff={setIsStaff} restaurantName={restaurantName} />} />
                     ) : (
-                        <Route index element={<StaffOverview restaurantName={restaurantName}/>} />
+                        <Route>
+                            <Route index element={<StaffOverview restaurantName={restaurantName}/>} />
+                            <Route path="tables/" element={<TableLayout restaurantName={restaurantName}/>} />
+                            <Route path="reservations/" element={<TimeLayout restaurantName={restaurantName}/>} />
+                        </Route>
                     )}
                 </Routes>
             </div>
