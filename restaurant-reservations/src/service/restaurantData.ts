@@ -1,4 +1,4 @@
-import { Reservation, Restaurant, Table, dayAsNumeral, compareTimes} from "../component/models";
+import { Reservation, Restaurant, Table, dayAsNumeral, compareTimes, timeInMinutes} from "../component/models";
 
 let baseURL = "http://localhost:5000/restaurants/";
 
@@ -104,6 +104,7 @@ const convertTimeToTuple = (resTime: {hour: number, minute: number, time: string
     return [resTime.hour, resTime.minute, resTime.time];
 }
 
+/*
 const sortReservationsByTime = (resArr: Reservation[]): void => {
     for (let i = 0; i < resArr.length - 1; i++) {
         let earliest = i;
@@ -121,15 +122,56 @@ const sortReservationsByTime = (resArr: Reservation[]): void => {
         resArr[earliest] = temp;
     }
 }
+*/
 
-export const loadRestaurantReservationsOrdered = (restaurantName: string, callback: (reservations: Reservation[][]) => void) => {
+const mergeSort = (list: Reservation[], s: number, e: number, compare: (r: Reservation, r2: Reservation) => boolean): void => {
+    if (s == e) {
+        return;
+    }
+    const mid: number = parseInt("" + ((s + e) / 2));
+    mergeSort(list, s, mid, compare);
+    mergeSort(list, mid+1, e, compare);
+    
+    let p1: number = s;
+    let p2: number = mid+1;
+    let temp: Reservation[] = [];
+    while (p1 < mid+1 && p2 < e+1) {
+        if (compare(list[p1], list[p2]) == true)
+            temp.push(list[p1++]);
+        else 
+            temp.push(list[p2++]);
+    } 
+
+    while (p1 < mid+1)
+        temp.push(list[p1++]);
+    while (p2 < e+1)
+        temp.push(list[p2++]);
+    
+    for (let i = s; i <= e; i++) {
+        list[i] = temp[i-s];
+    }
+}
+
+
+export const loadRestaurantReservationsOrdered = (restaurantName: string, callback: (reservations: Reservation[]) => void) => {
     const req = new XMLHttpRequest();
     req.addEventListener("load", () => {
         if (req.responseText === "") 
             return;
         
-        const reservations: Reservation[] = JSON.parse(req.response);
-
+        let reservations: Reservation[] = JSON.parse(req.response);
+        mergeSort(reservations, 0, reservations.length-1, (r1: Reservation, r2: Reservation): boolean => {
+            const t1: [number, number, string] = [r1.time.hour, r1.time.minute, r1.time.time];
+            const t2: [number, number, string] = [r2.time.hour, r2.time.minute, r2.time.time];
+            return (timeInMinutes(t1) <= timeInMinutes(t2));
+        });
+        mergeSort(reservations, 0, reservations.length-1, (r1: Reservation, r2: Reservation): boolean => {
+            const d1: [number, number, number] = [r1.date.day, r1.date.month, r1.date.year];
+            const d2: [number, number, number] = [r2.date.day, r2.date.month, r2.date.year];
+            return (dayAsNumeral(d1) <= dayAsNumeral(d2));
+        });
+        console.log(reservations);
+        /*
         const nowDate = new Date(Date.now());
         const today = dayAsNumeral([nowDate.getDate(), nowDate.getMonth() + 1, nowDate.getFullYear()]);
         let orderedReservations: Reservation[][] = [];
@@ -148,14 +190,14 @@ export const loadRestaurantReservationsOrdered = (restaurantName: string, callba
             
             orderedReservations[dateDifference].push(reservations[i]);
         }
-
+        
         console.log(orderedReservations);
 
         for (let i = 0; i < orderedReservations.length; i++) {
             sortReservationsByTime(orderedReservations[i]);
         }
-
-        callback(orderedReservations);
+        */
+        callback(reservations);
     });
 
     req.open("GET", baseURL + "reservations/" + restaurantName, false);

@@ -49,7 +49,7 @@ var dayAsNumeral = function (date) {
     for (var i = 0; i < date[1] - 1; i++) {
         daysToNow += daysInMonth[i];
     }
-    daysToNow += daysInMonth[date[1] - 1];
+    daysToNow += date[0];
     return (daysToNow
         + date[2] * 1000);
 };

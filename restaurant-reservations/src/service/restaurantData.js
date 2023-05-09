@@ -152,19 +152,47 @@ exports.loadStaffAccessKey = loadStaffAccessKey;
 var convertTimeToTuple = function (resTime) {
     return [resTime.hour, resTime.minute, resTime.time];
 };
-var sortReservationsByTime = function (resArr) {
-    for (var i = 0; i < resArr.length - 1; i++) {
-        var earliest = i;
-        for (var j = i + 1; j < resArr.length; j++) {
-            var timeEarliest = convertTimeToTuple(resArr[earliest].time);
-            var timeCurr = convertTimeToTuple(resArr[j].time);
-            if ((0, models_1.compareTimes)(timeEarliest, timeCurr) < 0) {
+/*
+const sortReservationsByTime = (resArr: Reservation[]): void => {
+    for (let i = 0; i < resArr.length - 1; i++) {
+        let earliest = i;
+
+        for (let j = i+1; j < resArr.length; j++) {
+            const timeEarliest = convertTimeToTuple(resArr[earliest].time);
+            const timeCurr = convertTimeToTuple(resArr[j].time);
+            if (compareTimes(timeEarliest, timeCurr) < 0) {
                 earliest = j;
             }
         }
-        var temp = resArr[i];
+
+        const temp = resArr[i];
         resArr[i] = resArr[earliest];
         resArr[earliest] = temp;
+    }
+}
+*/
+var mergeSort = function (list, s, e, compare) {
+    if (s == e) {
+        return;
+    }
+    var mid = parseInt("" + ((s + e) / 2));
+    mergeSort(list, s, mid, compare);
+    mergeSort(list, mid + 1, e, compare);
+    var p1 = s;
+    var p2 = mid + 1;
+    var temp = [];
+    while (p1 < mid + 1 && p2 < e + 1) {
+        if (compare(list[p1], list[p2]) == true)
+            temp.push(list[p1++]);
+        else
+            temp.push(list[p2++]);
+    }
+    while (p1 < mid + 1)
+        temp.push(list[p1++]);
+    while (p2 < e + 1)
+        temp.push(list[p2++]);
+    for (var i = s; i <= e; i++) {
+        list[i] = temp[i - s];
     }
 };
 var loadRestaurantReservationsOrdered = function (restaurantName, callback) {
@@ -173,24 +201,44 @@ var loadRestaurantReservationsOrdered = function (restaurantName, callback) {
         if (req.responseText === "")
             return;
         var reservations = JSON.parse(req.response);
-        var nowDate = new Date(Date.now());
-        var today = (0, models_1.dayAsNumeral)([nowDate.getDate(), nowDate.getMonth() + 1, nowDate.getFullYear()]);
-        var orderedReservations = [];
-        for (var i = 0; i < reservations.length; i++) {
-            var resDate = reservations[i].date;
-            var reservationDate = (0, models_1.dayAsNumeral)([resDate.day, resDate.month, resDate.year]);
+        mergeSort(reservations, 0, reservations.length - 1, function (r1, r2) {
+            var t1 = [r1.time.hour, r1.time.minute, r1.time.time];
+            var t2 = [r2.time.hour, r2.time.minute, r2.time.time];
+            return ((0, models_1.timeInMinutes)(t1) <= (0, models_1.timeInMinutes)(t2));
+        });
+        mergeSort(reservations, 0, reservations.length - 1, function (r1, r2) {
+            var d1 = [r1.date.day, r1.date.month, r1.date.year];
+            var d2 = [r2.date.day, r2.date.month, r2.date.year];
+            return ((0, models_1.dayAsNumeral)(d1) <= (0, models_1.dayAsNumeral)(d2));
+        });
+        console.log(reservations);
+        /*
+        const nowDate = new Date(Date.now());
+        const today = dayAsNumeral([nowDate.getDate(), nowDate.getMonth() + 1, nowDate.getFullYear()]);
+        let orderedReservations: Reservation[][] = [];
+
+        for (let i = 0; i < reservations.length; i++) {
+            const resDate = reservations[i].date;
+            const reservationDate = dayAsNumeral([resDate.day, resDate.month, resDate.year]);
             console.log(today, reservationDate);
-            var dateDifference = reservationDate % 1000 - today % 1000;
-            dateDifference += (parseInt("" + reservationDate / 1000) !== parseInt("" + today / 1000)) ? ((nowDate.getFullYear() % 400 === 0 || (nowDate.getFullYear() % 4 === 0 && nowDate.getFullYear() % 100 !== 0)) ? 366 : 365) : 0;
+            let dateDifference = reservationDate%1000 - today%1000;
+            dateDifference += (parseInt("" + reservationDate/1000) !== parseInt("" + today/1000)) ? (
+                (nowDate.getFullYear()%400 === 0 || (nowDate.getFullYear()%4 === 0 && nowDate.getFullYear()%100 !== 0) ) ? 365 : 364
+            ) : 0;
+
             if (orderedReservations[dateDifference] === undefined)
                 orderedReservations[dateDifference] = [];
+            
             orderedReservations[dateDifference].push(reservations[i]);
         }
+        
         console.log(orderedReservations);
-        for (var i = 0; i < orderedReservations.length; i++) {
+
+        for (let i = 0; i < orderedReservations.length; i++) {
             sortReservationsByTime(orderedReservations[i]);
         }
-        callback(orderedReservations);
+        */
+        callback(reservations);
     });
     req.open("GET", baseURL + "reservations/" + restaurantName, false);
     req.send();

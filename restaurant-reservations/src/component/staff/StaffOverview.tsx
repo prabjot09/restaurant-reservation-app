@@ -17,7 +17,7 @@ export const StaffOverview: React.FC<Props> = ( { restaurantName } ) => {
     const [lateGuests, setLateGuests] = useState<number>(0);
     const [nextReservations, setNextReservations] = useState<Reservation[]>([]);
     const [reservationsAttended, setReservationsAttended] = useState<number>(0);
-    const [reservations, setReservations] = useState<Reservation[][]>();
+    const [reservations, setReservations] = useState<Reservation[]>();
 
     const clearPreviousLogistics = () => {
         setCurrentGuests(0);
@@ -27,29 +27,32 @@ export const StaffOverview: React.FC<Props> = ( { restaurantName } ) => {
         setNextReservations([]);
     }
     
-    const getReservations = () => loadRestaurantReservationsOrdered(restaurantName, (reservations: Reservation[][]) => {
+    const getReservations = () => loadRestaurantReservationsOrdered(restaurantName, (reservations: Reservation[]) => {
         setReservations(reservations);
         clearPreviousLogistics();
         let curr = 0, late = 0, remaining = 0, attended = 0, next = [];
-        for (let i = 0; i < reservations[0].length; i++) {
-            console.log(i);
+        for (let i = 0; i < reservations.length; i++) {
+            const today = new Date(Date.now());
+            const date: Reservation["date"] = reservations[i].date;
+            if (!(today.getDate() == date.day && today.getMonth()+1 == date.month && today.getFullYear() == date.year))
+                continue;
 
-            if (reservations[0][i].status === STATUS.ARRIVED)
+            if (reservations[i].status === STATUS.ARRIVED)
                 curr += 1;
             
-            else if (reservations[0][i].status === STATUS.LATE)
+            else if (reservations[i].status === STATUS.LATE)
                 late += 1;
 
-            else if (reservations[0][i].status === STATUS.UPCOMING) {
+            else if (reservations[i].status === STATUS.UPCOMING) {
                 console.log(i);
                 remaining += 1;
 
                 if (next.length < 3) {
-                    next.push(reservations[0][i]);
+                    next.push(reservations[i]);
                 }
             }
 
-            else if (reservations[0][i].status === STATUS.PAID) {
+            else if (reservations[i].status === STATUS.PAID) {
                 attended += 1;
             }
         }
