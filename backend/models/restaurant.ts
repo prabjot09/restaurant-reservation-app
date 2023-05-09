@@ -23,7 +23,7 @@ export interface ReservationIF {
     date: DateIF;
     time: TimeIF
     duration: {hours: number, minutes: number };
-    status: String;
+    status: number;
     _id: ObjectId;
 };
 
