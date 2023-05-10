@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.loadRestaurantReservationsOrdered = exports.loadStaffAccessKey = exports.loadRestaurantReservations = exports.loadRestaurantTables = exports.loadRestaurantHours = exports.loadRestaurant = exports.getRestaurant = exports.saveRestaurant = void 0;
+exports.loadTodayReservations = exports.loadRestaurantReservationsOrdered = exports.loadStaffAccessKey = exports.loadRestaurantReservations = exports.loadRestaurantTables = exports.loadRestaurantHours = exports.loadRestaurant = exports.getRestaurant = exports.saveRestaurant = void 0;
 var models_1 = require("../component/models");
 var baseURL = "http://localhost:5000/restaurants/";
 var saveRestaurant = function (restaurant) { return __awaiter(void 0, void 0, void 0, function () {
@@ -212,35 +212,28 @@ var loadRestaurantReservationsOrdered = function (restaurantName, callback) {
             return ((0, models_1.dayAsNumeral)(d1) <= (0, models_1.dayAsNumeral)(d2));
         });
         console.log(reservations);
-        /*
-        const nowDate = new Date(Date.now());
-        const today = dayAsNumeral([nowDate.getDate(), nowDate.getMonth() + 1, nowDate.getFullYear()]);
-        let orderedReservations: Reservation[][] = [];
-
-        for (let i = 0; i < reservations.length; i++) {
-            const resDate = reservations[i].date;
-            const reservationDate = dayAsNumeral([resDate.day, resDate.month, resDate.year]);
-            console.log(today, reservationDate);
-            let dateDifference = reservationDate%1000 - today%1000;
-            dateDifference += (parseInt("" + reservationDate/1000) !== parseInt("" + today/1000)) ? (
-                (nowDate.getFullYear()%400 === 0 || (nowDate.getFullYear()%4 === 0 && nowDate.getFullYear()%100 !== 0) ) ? 365 : 364
-            ) : 0;
-
-            if (orderedReservations[dateDifference] === undefined)
-                orderedReservations[dateDifference] = [];
-            
-            orderedReservations[dateDifference].push(reservations[i]);
-        }
-        
-        console.log(orderedReservations);
-
-        for (let i = 0; i < orderedReservations.length; i++) {
-            sortReservationsByTime(orderedReservations[i]);
-        }
-        */
         callback(reservations);
     });
     req.open("GET", baseURL + "reservations/" + restaurantName, false);
     req.send();
 };
 exports.loadRestaurantReservationsOrdered = loadRestaurantReservationsOrdered;
+var loadTodayReservations = function (restaurantName) { return __awaiter(void 0, void 0, void 0, function () {
+    var reservations, req;
+    return __generator(this, function (_a) {
+        reservations = [];
+        req = new XMLHttpRequest();
+        req.addEventListener("load", function () {
+            reservations = JSON.parse(req.response);
+            mergeSort(reservations, 0, reservations.length - 1, function (r1, r2) {
+                var t1 = [r1.time.hour, r1.time.minute, r1.time.time];
+                var t2 = [r2.time.hour, r2.time.minute, r2.time.time];
+                return ((0, models_1.timeInMinutes)(t1) <= (0, models_1.timeInMinutes)(t2));
+            });
+        });
+        req.open("GET", baseURL + "reservations/" + restaurantName + "/today", false);
+        req.send();
+        return [2 /*return*/, reservations];
+    });
+}); };
+exports.loadTodayReservations = loadTodayReservations;

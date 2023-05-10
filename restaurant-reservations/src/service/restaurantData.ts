@@ -45,7 +45,7 @@ export const loadRestaurant = async (restaurantName: string) => {
     req.send();
 
     return restaurant;
-}
+};
 
 export const loadRestaurantHours = async (restaurantName: string) => {
     let hours: { open: [number, number, string], close: [number, number, string]} = {open: [-1, -1, ''], close: [-1, -1, '']}; 
@@ -171,37 +171,30 @@ export const loadRestaurantReservationsOrdered = (restaurantName: string, callba
             return (dayAsNumeral(d1) <= dayAsNumeral(d2));
         });
         console.log(reservations);
-        /*
-        const nowDate = new Date(Date.now());
-        const today = dayAsNumeral([nowDate.getDate(), nowDate.getMonth() + 1, nowDate.getFullYear()]);
-        let orderedReservations: Reservation[][] = [];
-
-        for (let i = 0; i < reservations.length; i++) {
-            const resDate = reservations[i].date;
-            const reservationDate = dayAsNumeral([resDate.day, resDate.month, resDate.year]);
-            console.log(today, reservationDate);
-            let dateDifference = reservationDate%1000 - today%1000;
-            dateDifference += (parseInt("" + reservationDate/1000) !== parseInt("" + today/1000)) ? (
-                (nowDate.getFullYear()%400 === 0 || (nowDate.getFullYear()%4 === 0 && nowDate.getFullYear()%100 !== 0) ) ? 365 : 364
-            ) : 0;
-
-            if (orderedReservations[dateDifference] === undefined)
-                orderedReservations[dateDifference] = [];
-            
-            orderedReservations[dateDifference].push(reservations[i]);
-        }
-        
-        console.log(orderedReservations);
-
-        for (let i = 0; i < orderedReservations.length; i++) {
-            sortReservationsByTime(orderedReservations[i]);
-        }
-        */
         callback(reservations);
     });
 
     req.open("GET", baseURL + "reservations/" + restaurantName, false);
     req.send();
+};
+
+export const loadTodayReservations = async (restaurantName: string): Promise<Reservation[]> => {
+    
+    let reservations: Reservation[] = []; 
+
+    const req = new XMLHttpRequest();
+    req.addEventListener("load", () => {
+        reservations = JSON.parse(req.response);
+        mergeSort(reservations, 0, reservations.length-1, (r1: Reservation, r2: Reservation): boolean => {
+            const t1: [number, number, string] = [r1.time.hour, r1.time.minute, r1.time.time];
+            const t2: [number, number, string] = [r2.time.hour, r2.time.minute, r2.time.time];
+            return (timeInMinutes(t1) <= timeInMinutes(t2));
+        });
+    });
+    req.open("GET", baseURL + "reservations/" + restaurantName + "/today", false);
+    req.send();
+ 
+    return reservations;
 };
 
  

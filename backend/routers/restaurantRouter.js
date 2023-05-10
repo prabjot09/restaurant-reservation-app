@@ -97,4 +97,17 @@ restaurantRouter.route("/staff_key/:name").get((req, res) => __awaiter(void 0, v
     else
         res.send("Error: Restaurant not Found");
 }));
+restaurantRouter.route("/reservations/:name/today").get((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const restaurantName = req.params.name;
+    const restaurant = yield restaurant_1.Restaurant.findOne({ name: restaurantName });
+    if (restaurant === null) {
+        res.send("");
+        return;
+    }
+    const reservationIds = restaurant.reservations;
+    const today = new Date(Date.now());
+    const [date, month, year] = [today.getDate(), today.getMonth() + 1, today.getFullYear()];
+    const reservations = yield restaurant_1.Reservation.find({ _id: { $in: reservationIds }, 'date.day': date, 'date.month': month, 'date.year': year });
+    res.send(reservations);
+}));
 exports.default = restaurantRouter;

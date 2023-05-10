@@ -52,24 +52,29 @@ setInterval(async () => {
             continue;
         }
 
-        const date: DateIF = reservation.date;
-        if (date.year < pastDate[2] || 
-            (date.year == pastDate[2] && date.month < pastDate[1]) ||
-            (date.year == pastDate[2] && date.month == pastDate[1] && date.day < pastDate[0])) {
-                
-                console.log(reservation._id + ": Deleted");
-                await Reservation.findByIdAndDelete(reservation._id);
-                await Restaurant.updateOne({ name: restaurant.name }, { $pull: { reservations: reservation._id} });
+        const isInPast = (d1: [number, number, number], d2: [number, number, number]): boolean => {
+            return (d1[2] < d2[2] || 
+                (d1[2] == d2[2] && d1[1] < d2[1]) ||
+                (d1[2] == d2[2] && d1[1] == d2[1] && d1[0] < d2[0]));
         }
 
-        if (date.year == today.getDate() && date.month == today.getMonth()+1 && date.year == today.getFullYear() && reservation.status == 0) {
+        const date: DateIF = reservation.date;
+        if (isInPast([date.day, date.month, date.year], pastDate)) {
+            console.log(reservation._id + ": Deleted");
+            await Reservation.findByIdAndDelete(reservation._id);
+            await Restaurant.updateOne({ name: restaurant.name }, { $pull: { reservations: reservation._id} });
+            continue;
+        }
+
+        const time: TimeIF = reservation.time;
+        const now_time: number = today.getHours()*60 + today.getMinutes();
+        const res_time: number = (((time.hour != 12) ? time.hour : 0) + (time.time == "PM" ? 12 : 0))*60 + time.minute;
+        let old = isInPast([date.day, date.month, date.year], [today.getDate(), today.getMonth()+1, today.getFullYear()]); 
+        old = old || (date.day == today.getDate() && date.month == today.getMonth()+1 && date.year == today.getFullYear() && res_time < now_time);
+           
+        if (old && reservation.status == 0) {
             console.log(reservation._id + ": Late");
-            const time: TimeIF = reservation.time;
-            const now_time: number = today.getHours()*60 + today.getMinutes();
-            const res_time: number = (((time.hour != 12) ? time.hour : 0) + (time.time == "PM" ? 12 : 0))*60 + time.minute;
-            if (res_time < now_time) {
-                Reservation.updateOne({ _id: reservation._id}, { status: 1 });
-            }
+            await Reservation.updateOne({ _id: reservation._id}, { status: 1 });
         } 
     }
 

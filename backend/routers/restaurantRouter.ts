@@ -110,6 +110,22 @@ restaurantRouter.route("/staff_key/:name").get(async (req, res) => {
         res.send( { accessKey : restaurant.staffKey } );
     else
         res.send("Error: Restaurant not Found");
-})
+});
+
+restaurantRouter.route("/reservations/:name/today").get(async (req, res) => {
+    const restaurantName = req.params.name;
+    const restaurant: RestaurantIF | null = await Restaurant.findOne({ name: restaurantName });
+    if (restaurant === null) {
+        res.send("");
+        return;
+    }
+
+    const reservationIds: mongoose.ObjectId[] = restaurant.reservations; 
+    const today = new Date(Date.now());
+    const [date, month, year] = [today.getDate(), today.getMonth()+1, today.getFullYear()];
+
+    const reservations: ReservationIF[] = await Reservation.find({ _id: { $in: reservationIds}, 'date.day': date , 'date.month': month, 'date.year': year});
+    res.send(reservations)
+});
 
 export default restaurantRouter;

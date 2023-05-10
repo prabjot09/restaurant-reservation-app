@@ -97,8 +97,8 @@ export const UserTableSelection: React.FC<Props> = ({ hours, table, reservations
                 onClick={ () => selectTable(table, divisions) }
             >
                 <div className="row mt-0 mb-4 ms-3 me-3">
-                    <p className="col-6 text-start m-0 fs-5"><strong>Table {table.num}:</strong></p>
-                    <p className="col-6 text-end m-0  tableLabels">Seating Capacity: {table.capacity}</p>
+                    <p className="col-6 text-start m-0 p-0 fs-5"><strong>Table {table.num}:</strong></p>
+                    <p className="col-6 text-end m-0 p-0 tableLabels">Seating Capacity: {table.capacity}</p>
                 </div>
                 
                 <div className="row m-1 p-sm-1">

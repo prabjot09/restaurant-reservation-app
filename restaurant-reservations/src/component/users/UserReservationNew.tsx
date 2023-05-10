@@ -295,12 +295,12 @@ export const UserReservationNew: React.FC<Props> = ({ username, restaurantName }
         <div className="container">
             <div className="m-2 pt-3 ps-3 pe-3 border border-2 border-primary rounded">
                 <div className="row">
-                    <div className="col-3 col-md-2 col-xl-1">
-                        <IconContext.Provider value={{size: "3.5em", color: "white"}}>
-                            <Link to="/user/" ><TiArrowBack className="border border-3 rounded-circle p-2 bg-primary float-start"/></Link>
+                    <div className="col-3 col-md-2 col-xl-1 position-absolute p-2">
+                        <IconContext.Provider value={{size: "2.5em", color: "white"}}>
+                            <Link to="/user/" ><TiArrowBack className="border border-3 rounded-circle p-1 bg-primary float-start"/></Link>
                         </IconContext.Provider>
                     </div>
-                    <div className="col-9 col-md-10 col-xl-11">
+                    <div className="col-12">
                         <p className="fs-4 m-2"><strong>Book Reservation</strong></p>
                     </div>                        
                 </div>

@@ -56,22 +56,26 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
             console.log("Data Synch Issue: Reservation ID in restaurant list not found!");
             continue;
         }
+        const isInPast = (d1, d2) => {
+            return (d1[2] < d2[2] ||
+                (d1[2] == d2[2] && d1[1] < d2[1]) ||
+                (d1[2] == d2[2] && d1[1] == d2[1] && d1[0] < d2[0]));
+        };
         const date = reservation.date;
-        if (date.year < pastDate[2] ||
-            (date.year == pastDate[2] && date.month < pastDate[1]) ||
-            (date.year == pastDate[2] && date.month == pastDate[1] && date.day < pastDate[0])) {
+        if (isInPast([date.day, date.month, date.year], pastDate)) {
             console.log(reservation._id + ": Deleted");
             yield restaurant_1.Reservation.findByIdAndDelete(reservation._id);
             yield restaurant_1.Restaurant.updateOne({ name: restaurant.name }, { $pull: { reservations: reservation._id } });
+            continue;
         }
-        if (date.year == today.getDate() && date.month == today.getMonth() + 1 && date.year == today.getFullYear() && reservation.status == 0) {
+        const time = reservation.time;
+        const now_time = today.getHours() * 60 + today.getMinutes();
+        const res_time = (((time.hour != 12) ? time.hour : 0) + (time.time == "PM" ? 12 : 0)) * 60 + time.minute;
+        let old = isInPast([date.day, date.month, date.year], [today.getDate(), today.getMonth() + 1, today.getFullYear()]);
+        old = old || (date.day == today.getDate() && date.month == today.getMonth() + 1 && date.year == today.getFullYear() && res_time < now_time);
+        if (old && reservation.status == 0) {
             console.log(reservation._id + ": Late");
-            const time = reservation.time;
-            const now_time = today.getHours() * 60 + today.getMinutes();
-            const res_time = (((time.hour != 12) ? time.hour : 0) + (time.time == "PM" ? 12 : 0)) * 60 + time.minute;
-            if (res_time < now_time) {
-                restaurant_1.Reservation.updateOne({ _id: reservation._id }, { status: 1 });
-            }
+            yield restaurant_1.Reservation.updateOne({ _id: reservation._id }, { status: 1 });
         }
     }
     console.log("Periodic Clean Up Done");
