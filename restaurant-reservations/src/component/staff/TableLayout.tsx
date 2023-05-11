@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Reservation, Table, timeInMinutes } from "../models";
+import { Reservation, STATUS, Table, timeInMinutes } from "../models";
 import { loadTodayReservations, loadRestaurantHours, loadRestaurantTables } from "../../service/restaurantData";
 import { UserTableSelection } from "../users/UserTableSelection";
 
@@ -16,6 +16,10 @@ const TableLayout: React.FC<Props> = ({ restaurantName }) => {
     const [restaurantHours, setRestaurantHours] = useState<{open: [number, number, string], close: [number, number, string]}>(
         {open: [-1, -1, ''], close: [-1, -1, '']}
     );
+    const [lateReservations, setLate] = useState<{[table: number]: Reservation | null}>({});
+    const [ongoingReservations, setOngoing] = useState<{[table: number]: Reservation | null}>({});
+    const [upcomingReservations, setUpcoming] = useState<{[table: number]: Reservation | null}>({});
+
     const [redo, setRedo] = useState<boolean>(false);
 
     const loadTableData = () => {
@@ -49,20 +53,25 @@ const TableLayout: React.FC<Props> = ({ restaurantName }) => {
         return map;
     }
 
-    const getNextReservation = (table_num: number) => {
+    const setTableReservations = (table_num: number) => {
         const reservations: Reservation[] = reservationMap[table_num];
         if (reservations === undefined)
             return null;
         
         let i = 0;
-        const today = new Date(Date.now());
-        const now = today.getHours() * 60 + today.getMinutes();
         while (i < reservations.length) {
-            const res_time = reservations[i].time;
-            const res_mins = timeInMinutes([res_time.hour, res_time.minute, res_time.time]);
-            if (res_mins > now) {
-                return reservations[i]
+            if (ongoingReservations[table_num] == null && reservations[i].status == STATUS.ARRIVED) {
+                ongoingReservations[table_num] = reservations[i];
             }
+
+            if (upcomingReservations[table_num] == null && reservations[i].status == STATUS.UPCOMING) {
+                upcomingReservations[table_num] = reservations[i];
+            }
+
+            if (lateReservations[table_num] == null && reservations[i].status == STATUS.LATE) {
+                lateReservations[table_num] = reservations[i];
+            }
+
             i += 1;
         }
 
@@ -75,6 +84,12 @@ const TableLayout: React.FC<Props> = ({ restaurantName }) => {
                 console.log("Data Loaded!");
                 //if (loaded != reservations)
                 setReservationMap(mapReservationsToTables(loaded));
+                for (let i = 0; i < tables.length; i++) {
+                    ongoingReservations[i] = null;
+                    upcomingReservations[i] = null;
+                    lateReservations[i] = null;
+                    setTableReservations(tables[i].num);
+                }
             })
             .catch(() => {
                 console.log("Issue retrieving today's reservations");
@@ -82,8 +97,8 @@ const TableLayout: React.FC<Props> = ({ restaurantName }) => {
         setTimeout(() => {
             console.log(reservationMap);
             setRedo(!redo);
-        },  6 * 1000);
-    }, [redo]);
+        },  60 * 1000);
+    }, [redo, tables]);
     
     return (
         <div className="mt-2 mb-4">            
@@ -101,29 +116,49 @@ const TableLayout: React.FC<Props> = ({ restaurantName }) => {
             <div id="table_list" className="row pt-3 pb-2">
                 {tables.map((table) => {
                     return (
-                        <div className="col-12 col-md-6 col-xl-4 tableUnselected p-1" key={table.num}>
-                            <div className="">
-                                <UserTableSelection 
-                                    hours={[timeInMinutes(restaurantHours.open), timeInMinutes(restaurantHours.close)]}
-                                    table={table}
-                                    reservations={reservationMap[table.num] ? reservationMap[table.num] : []}
-                                    selectTable={() => {return;}}
-                                    selected={false}
-                                    selectionPage={true}
-                                />                    
+                        <div className="col-12 col-md-6 col-xl-4 mb-3" key={table.num}>
+                            <div className={`${lateReservations[table.num] != null ? "border border-3 border-danger": ""}`}>
+                                <div className="tableUnselected">
+                                    <UserTableSelection 
+                                        hours={[timeInMinutes(restaurantHours.open), timeInMinutes(restaurantHours.close)]}
+                                        table={table}
+                                        reservations={reservationMap[table.num] ? reservationMap[table.num] : []}
+                                        selectTable={() => {return;}}
+                                        selected={false}
+                                        selectionPage={true}
+                                    />                    
+                                </div>
+                                <div className="tableUnselected p-1">
+                                    { lateReservations[table.num] != null ? (
+                                        <div className="text-danger">
+                                            <strong>Late Reservation</strong> <br />
+                                            Group : { lateReservations[table.num]?.groupName } <br />
+                                            Expected Arrival: { lateReservations[table.num]?.time.hour + ":" +
+                                                                lateReservations[table.num]?.time.minute + " " +
+                                                                lateReservations[table.num]?.time.time }
+                                        </div>
+                                    ) : (ongoingReservations[table.num] != null ? (
+                                        <div className="text-success">
+                                            <strong>Currently Reserved</strong> <br />
+                                            Group: { ongoingReservations[table.num]?.groupName } <br />
+                                            End Time: { ongoingReservations[table.num]?.time.hour + ":" +
+                                                        ongoingReservations[table.num]?.time.minute + " " +
+                                                        ongoingReservations[table.num]?.time.time }
+                                        </div>
+                                    ) : (upcomingReservations[table.num] != null ? (
+                                        <div className="text-primary">
+                                            <strong>Next Reservation</strong> <br />
+                                            Group : { upcomingReservations[table.num]?.groupName } <br />
+                                            Arrival: { upcomingReservations[table.num]?.time.hour + ":" +
+                                                    upcomingReservations[table.num]?.time.minute + " " +
+                                                    upcomingReservations[table.num]?.time.time }
+                                        </div>
+                                    ) : (
+                                        "Table is Clear for the Day!"
+                                    )))}
+                                </div>
                             </div>
-                            <div className="">
-                                Next Reservation: { getNextReservation(table.num) != null  ? (
-                                    <div>
-                                        Group: { getNextReservation(table.num)?.groupName} <br/>
-                                        Arrival: { getNextReservation(table.num)?.time.hour + ":" +
-                                                  getNextReservation(table.num)?.time.minute + " " +
-                                                  getNextReservation(table.num)?.time.time }
-                                    </div>
-                                ) : (
-                                    "None"
-                                )}
-                            </div>
+                            
                         </div>
                     )
                 })}

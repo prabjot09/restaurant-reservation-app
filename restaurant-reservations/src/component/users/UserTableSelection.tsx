@@ -91,9 +91,9 @@ export const UserTableSelection: React.FC<Props> = ({ hours, table, reservations
     }
 
     return (
-        <div className={selectionPage === undefined ? "col-12 col-lg-6 col-xl-4" : "col-12 offset-lg-1 col-lg-10"}>
+        <div className="col-12">
             <div 
-                className={`rounded ps-sm-2 pe-sm-2 pt-4 pb-3 mb-4 ${cardBg()} ${selectionPage ? "" : "table-card"}`}
+                className={`rounded ps-sm-2 pe-sm-2 pt-4 pb-3 ${cardBg()} ${selectionPage ? "" : "table-card"}`}
                 onClick={ () => selectTable(table, divisions) }
             >
                 <div className="row mt-0 mb-4 ms-3 me-3">

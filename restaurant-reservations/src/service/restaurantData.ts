@@ -125,10 +125,10 @@ const sortReservationsByTime = (resArr: Reservation[]): void => {
 */
 
 const mergeSort = (list: Reservation[], s: number, e: number, compare: (r: Reservation, r2: Reservation) => boolean): void => {
-    if (s == e) {
+    if (s >= e) {
         return;
     }
-    const mid: number = parseInt("" + ((s + e) / 2));
+    const mid: number = Math.floor((s + e) / 2);
     mergeSort(list, s, mid, compare);
     mergeSort(list, mid+1, e, compare);
     

@@ -172,10 +172,10 @@ const sortReservationsByTime = (resArr: Reservation[]): void => {
 }
 */
 var mergeSort = function (list, s, e, compare) {
-    if (s == e) {
+    if (s >= e) {
         return;
     }
-    var mid = parseInt("" + ((s + e) / 2));
+    var mid = Math.floor((s + e) / 2);
     mergeSort(list, s, mid, compare);
     mergeSort(list, mid + 1, e, compare);
     var p1 = s;

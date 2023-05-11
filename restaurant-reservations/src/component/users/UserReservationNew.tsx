@@ -402,19 +402,21 @@ export const UserReservationNew: React.FC<Props> = ({ username, restaurantName }
 
                     {pages === 2 && (
                     <div className="pt-3 pb-3 col-12 col-md-10 offset-md-1 offset-lg-0 col-lg-12">
-                        <div className="row justify-content-center">
+                        <div className="row">
                             {tables.map((table) => {
                                 if (table.num === 11)
                                     console.log(annotatedTables[table.num]);
 
-                                return <UserTableSelection 
-                                    key={table.num} 
-                                    hours={restaurantHoursInMins} 
-                                    table={table} 
-                                    reservations={annotatedTables[table.num] || []} 
-                                    selectTable={selectTable}
-                                    selected={table.num === selectedTable[0].num}
-                                />
+                                return <div className="col-12 col-lg-6 col-xl-4 pb-3">
+                                    <UserTableSelection
+                                        key={table.num} 
+                                        hours={restaurantHoursInMins} 
+                                        table={table} 
+                                        reservations={annotatedTables[table.num] || []} 
+                                        selectTable={selectTable}
+                                        selected={table.num === selectedTable[0].num}
+                                    />
+                                </div>
                             })}
                         </div>
                         <div className={inputColumn}>
@@ -432,7 +434,7 @@ export const UserReservationNew: React.FC<Props> = ({ username, restaurantName }
 
                     {pages === 3 && (
                     <div className="pt-3 pb-3 col-12 col-md-10 offset-md-1 offset-lg-0 col-lg-12">
-                        <div className="row">
+                        <div className="col-12 offset-lg-1 col-lg-10">
                             <UserTableSelection 
                                 hours={restaurantHoursInMins} 
                                 table={selectedTable[0]} 
