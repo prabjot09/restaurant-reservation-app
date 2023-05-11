@@ -46,6 +46,10 @@ code {
   border-radius: 5%;
 }
 
+.lightBg {
+  background-color: #eee;
+}
+
 @media (max-width: 575px) {
   #opt-container {
     height: 100px;
