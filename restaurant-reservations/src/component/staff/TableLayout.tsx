@@ -53,6 +53,13 @@ const TableLayout: React.FC<Props> = ({ restaurantName }) => {
         return map;
     }
 
+    const formatTime = (time: {hour: number, minute: number, time: string} | undefined): string => {
+        if (time === undefined)
+            return "";
+
+        return ("" + time.hour + ":" + Math.floor(time.minute/10) + time.minute%10 + " " + time.time)
+    }
+
     const setTableReservations = (table_num: number) => {
         const reservations: Reservation[] = reservationMap[table_num];
         if (reservations === undefined)
@@ -133,25 +140,19 @@ const TableLayout: React.FC<Props> = ({ restaurantName }) => {
                                         <div className="text-danger">
                                             <strong>Late Reservation</strong> <br />
                                             Group : { lateReservations[table.num]?.groupName } <br />
-                                            Expected Arrival: { lateReservations[table.num]?.time.hour + ":" +
-                                                                lateReservations[table.num]?.time.minute + " " +
-                                                                lateReservations[table.num]?.time.time }
+                                            Expected Arrival: { formatTime(lateReservations[table.num]?.time) }
                                         </div>
                                     ) : (ongoingReservations[table.num] != null ? (
                                         <div className="text-success">
                                             <strong>Currently Reserved</strong> <br />
                                             Group: { ongoingReservations[table.num]?.groupName } <br />
-                                            End Time: { ongoingReservations[table.num]?.time.hour + ":" +
-                                                        ongoingReservations[table.num]?.time.minute + " " +
-                                                        ongoingReservations[table.num]?.time.time }
+                                            End Time: { formatTime(ongoingReservations[table.num]?.time) }
                                         </div>
                                     ) : (upcomingReservations[table.num] != null ? (
                                         <div className="text-primary">
                                             <strong>Next Reservation</strong> <br />
                                             Group : { upcomingReservations[table.num]?.groupName } <br />
-                                            Arrival: { upcomingReservations[table.num]?.time.hour + ":" +
-                                                    upcomingReservations[table.num]?.time.minute + " " +
-                                                    upcomingReservations[table.num]?.time.time }
+                                            Arrival: { formatTime(upcomingReservations[table.num]?.time)}
                                         </div>
                                     ) : (
                                         "Table is Clear for the Day!"

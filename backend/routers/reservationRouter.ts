@@ -5,6 +5,14 @@ import restaurantRouter from "./restaurantRouter";
 
 const ReservationRouter = express.Router();
 
+ReservationRouter.route("/:restaurantName/update").post(async (req, res) => {
+    const reservation: ReservationIF = req.body.reservation;
+    await Reservation.findByIdAndUpdate(reservation._id, { $set: { status: reservation.status } });
+
+    const result: ReservationIF | null = await Reservation.findById(reservation._id);
+    res.send(result != null && result.status == reservation.status ? "true" : "false");
+});
+
 ReservationRouter.route("/:username").get(async (req, res) => {
     try {
         const reservations: ReservationIF[] = await Reservation.find( { groupName : req.params.username } );
@@ -36,9 +44,7 @@ ReservationRouter.route("/:restaurantName").post(async (req, res) => {
 });
 
 ReservationRouter.route("/:id").delete(async (req, res) => {
-    console.log('del');
     const toDelete = await Reservation.findOne({ _id: req.params.id });
-    console.log(toDelete?.restaurantName);
     if (toDelete) {
         const restaurant = await Restaurant.findOne( { name: toDelete.restaurantName });
         if (restaurant) {   

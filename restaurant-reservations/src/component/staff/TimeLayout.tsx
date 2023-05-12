@@ -32,7 +32,6 @@ const TimeLayout: React.FC<Props> = ({ restaurantName }) => {
                         new_views.late.push(reservations[i]);
                     else if (reservations[i].status == STATUS.UPCOMING)
                         new_views.upcoming.push(reservations[i]);
-                    console.log(views.upcoming.length);
                 }
                 setViews(new_views);
             }).catch(() => console.log("Issue with loading today's reservations"));
@@ -56,7 +55,9 @@ const TimeLayout: React.FC<Props> = ({ restaurantName }) => {
         
         new_views.current.push(reservation);
         setViews(new_views);
-        // TODO: Push change to DB (STATUS --> ONGOING)
+
+        reservation.status = STATUS.ARRIVED;
+        ReservationData.updateReservationStatus(reservation);
     }
 
     const checkOut = (reservation: Reservation): void => {
@@ -66,7 +67,9 @@ const TimeLayout: React.FC<Props> = ({ restaurantName }) => {
         
         new_views.current.splice(views.current.indexOf(reservation), 1);
         setViews(new_views);
-        // TODO: Push change to DB (STATUS --> DONE)
+        
+        reservation.status = STATUS.PAID;
+        ReservationData.updateReservationStatus(reservation);
     }
 
     const cancel = (reservation: Reservation): void => {
@@ -87,11 +90,9 @@ const TimeLayout: React.FC<Props> = ({ restaurantName }) => {
     }
 
     useEffect(() => {
-        console.log(reload);
         if (reload == false)
             return;
         
-        console.log('Effect');
         loadReservationData();        
         setReload(false);
     }, [reload]);

@@ -38,6 +38,21 @@ class ReservationData {
         req.open("DELETE", baseURL + id);
         req.send();
     }
+
+    static updateReservationStatus = (reservation: Reservation) => {
+        const req = new XMLHttpRequest();
+        
+        console.log(reservation.status);
+        req.addEventListener("load", () => {
+            if (req.responseText === "true")
+                console.log("Reservation has been updated to " + reservation.status);
+            else 
+                console.log("Issue in updating. Not successful");
+        })
+        req.open("POST", baseURL + reservation.restaurantName + "/update");
+        req.setRequestHeader("Content-Type", "application/json");
+        req.send(JSON.stringify( { reservation: reservation } ));
+    }
 }
 
 export default ReservationData;

@@ -19,20 +19,21 @@ const ReservationCard: React.FC<Props> = ({ reservation, stateChanges }) => {
                 </div>
                 <div className="col-8 p-1 text-start">
                     <strong className="text-primary">Time:</strong> 
-                    {" " + reservation.time.hour + ":" + reservation.time.minute + " " + reservation.time.time}
+                    {" " + reservation.time.hour + ":" + Math.floor(reservation.time.minute/10) + reservation.time.minute%10 + " " + reservation.time.time}
                 </div>
                 <div className="col-4 p-1 text-start">
-                    {" " + reservation.duration.hours + "h" + reservation.duration.minutes + "m"}
+                    {" " + reservation.duration.hours + "h" + Math.floor(reservation.duration.minutes/10) + reservation.duration.minutes%10 + "m"}
                 </div>
             </div>
         </div>
         <div className="col-4">
             <div className="row mb-1">
-                {stateChanges.map((change) => {
-                    return <button 
+                {stateChanges.map((change, index) => {
+                    return <button
+                        key={index} 
                         className="btn btn-primary mb-1 p-1"
                         onClick={() => change.change(reservation)}>
-
+                        
                         {change.label}
                     </button>
                 })}

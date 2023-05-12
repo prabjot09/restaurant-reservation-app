@@ -59,7 +59,7 @@ export const StaffOverview: React.FC<Props> = ( { restaurantName } ) => {
         
         setCurrentGuests(curr);     setLateGuests(late);
         setRemainingReservations(remaining);
-        setReservationsAttended(attended + curr + remaining);     
+        setReservationsAttended(attended);     
         setNextReservations(next);   
     });
 
@@ -74,7 +74,7 @@ export const StaffOverview: React.FC<Props> = ( { restaurantName } ) => {
                     <Statistic label="Checked In:" num={currentGuests} />
                     <Statistic label="Remaining:" num={remainingReservations} />
                     <Statistic label="Late:" num={lateGuests} />
-                    <Statistic label="Expected Total:" num={reservationsAttended} />
+                    <Statistic label="Done:" num={reservationsAttended} />
                 </div>
                 <div className="offset-1 col-10 offset-sm-0 col-sm-6 col-lg-9">
                     <div className="d-flex align-items-center justify-content-around staff_view_container"
@@ -107,7 +107,7 @@ export const StaffOverview: React.FC<Props> = ( { restaurantName } ) => {
                 <h3>Upcoming Reservations</h3>
                 {(nextReservations.length > 0 && (                
                     nextReservations.map((res, index) => {
-                        return (<div className="col-12 offset-md-2 col-md-8 offset-lg-0 col-lg-6 col-xl-4">
+                        return (<div key={index} className="col-12 offset-md-2 col-md-8 offset-lg-0 col-lg-6 col-xl-4">
                             <div className="mt-3 p-1 border rounded border-dark d-flex align-items-center upcoming_reservations">
                                 <p className="fs-5 text-secondary m-2">{index + 1}</p>
                                 <p className="fs-5 m-2">{res.groupName} - TABLE {res.table.num}</p>

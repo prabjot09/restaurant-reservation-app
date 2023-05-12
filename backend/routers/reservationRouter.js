@@ -15,6 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const restaurant_1 = require("../models/restaurant");
 const ReservationRouter = express_1.default.Router();
+ReservationRouter.route("/:restaurantName/update").post((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const reservation = req.body.reservation;
+    yield restaurant_1.Reservation.findByIdAndUpdate(reservation._id, { $set: { status: reservation.status } });
+    const result = yield restaurant_1.Reservation.findById(reservation._id);
+    res.send(result != null && result.status == reservation.status ? "true" : "false");
+}));
 ReservationRouter.route("/:username").get((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const reservations = yield restaurant_1.Reservation.find({ groupName: req.params.username });
@@ -38,9 +44,7 @@ ReservationRouter.route("/:restaurantName").post((req, res) => __awaiter(void 0,
     res.send((yield restaurant_1.Reservation.findOne({ _id: newReservation._id })) !== null ? "Success" : "Fail");
 }));
 ReservationRouter.route("/:id").delete((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('del');
     const toDelete = yield restaurant_1.Reservation.findOne({ _id: req.params.id });
-    console.log(toDelete === null || toDelete === void 0 ? void 0 : toDelete.restaurantName);
     if (toDelete) {
         const restaurant = yield restaurant_1.Restaurant.findOne({ name: toDelete.restaurantName });
         if (restaurant) {
